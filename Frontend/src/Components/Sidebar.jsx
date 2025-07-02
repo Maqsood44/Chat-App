@@ -1,14 +1,14 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { HiUserGroup } from "react-icons/hi";
 import { FiLogOut, FiSearch, FiMenu, FiX } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../Store/ReducSlice";
 import axios from "axios";
+import { FaUserPlus } from "react-icons/fa";
 
 export default function Sidebar({ allUsers, setSelectUser, selectUser }) {
-
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const handleLogout = async () => {
     try {
@@ -37,9 +37,16 @@ export default function Sidebar({ allUsers, setSelectUser, selectUser }) {
       >
         {/* Top Bar */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <img src="/logo white.png" alt="Logo" className="w-20 h-16 object-contain" />
+          <img
+            src="/logo white.png"
+            alt="Logo"
+            className="w-20 h-16 object-contain"
+          />
           <div className="flex space-x-3">
-            <button title="Groups" className="p-1 rounded-full hover:text-violet-700 transition">
+            <button
+              title="Groups"
+              className="p-1 rounded-full hover:text-violet-700 transition"
+            >
               <HiUserGroup size={20} />
             </button>
             <button
@@ -54,7 +61,10 @@ export default function Sidebar({ allUsers, setSelectUser, selectUser }) {
 
         {/* Search Bar */}
         <div className="p-2 border-b border-gray-700 relative">
-          <FiSearch className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400" size={16} />
+          <FiSearch
+            className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400"
+            size={16}
+          />
           <input
             type="text"
             placeholder="Search users..."
@@ -76,27 +86,43 @@ export default function Sidebar({ allUsers, setSelectUser, selectUser }) {
                   setIsOpen(false); // close sidebar on mobile
                 }}
                 className={`flex items-center px-4 py-3 cursor-pointer transition-all mb-1 mr-1 ${
-                  isSelected ? "bg-gray-800" : "hover:bg-gray-800 text-violet-700"
+                  isSelected
+                    ? "bg-gray-800"
+                    : "hover:bg-gray-800 text-violet-700"
                 }`}
               >
-
-                <div className="w-4 h-4 rounded-full bg-indigo-600" >
-                  <p></p>
-                </div>
                 <div className="w-10 h-10 bg-gray-100 rounded-full mr-3 border-2 border-b-indigo-600">
-                  <img src={user?.profileImage} alt="" className="w-full h-full rounded-full object-cover" />
+                  <img
+                    src={user?.profileImage}
+                    alt=""
+                    className="w-full h-full rounded-full object-cover"
+                  />
                 </div>
                 <div className="truncate">
                   <div
-                    className={`text-sm truncate ${
-                      isSelected ? "font-bold text-violet-700" : "font-medium text-gray-200"
+                    className={`text-sm truncat flex justify-between ${
+                      isSelected
+                        ? "font-bold text-violet-700"
+                        : "font-medium text-gray-200"
                     }`}
                   >
                     {user.fullName}
+                    {user.unseenCount > 0 && selectUser?._id !== user._id && (
+                      <div className="flex justify-center items-center w-6 h-6 rounded-full bg-indigo-600 ml-2">
+                        <p className="text-xs">{user.unseenCount}</p>
+                      </div>
+                    )}
                   </div>
                   <div className="text-xs text-gray-400 truncate w-40 sm:w-48">
                     Some sample message preview...
                   </div>
+                </div>
+                {
+                  
+                }
+
+                <div>
+                  <FaUserPlus />
                 </div>
               </motion.div>
             );

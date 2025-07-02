@@ -97,11 +97,11 @@ export default function ChatComponent({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 flex flex-col space-y space-y-4">
-        {[...conversation].map((msg) => {
+        {[...conversation].map((msg, index) => {
           const isSentByUser = msg.senderId === user._id;
           return (
             <div
-              key={msg._id}
+              key={index}
               className={`flex flex-col ${
                 isSentByUser ? "items-end" : "items-start"
               }`}

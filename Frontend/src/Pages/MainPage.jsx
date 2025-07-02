@@ -20,7 +20,7 @@ const ChatApp = () => {
       }
     };
     fetchUsers();
-  }, []);
+  }, [conversation]);
 
   // 🟨 When user selected, fetch conversation
   useEffect(() => {
