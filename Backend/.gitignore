@@ -1,0 +1,15 @@
+$modules files
+node_modules/
+
+#logs
+*.logs
+logs
+
+#Enviromnent variables
+.env
+*.env
+
+#Build structure
+dist/
+Build/
+out/
