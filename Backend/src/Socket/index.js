@@ -1,3 +1,5 @@
+import Message from "../models/chat.model.js"
+
 export const users = {}; // Stores userId -> socket.id
 export const initialSocketEvent = (io) => {
 
@@ -48,6 +50,23 @@ export const initialSocketEvent = (io) => {
         socket.emit("error", `User ${toUserId} is not online.`);
       }
     });
+
+    socket.on("seen-messages", async ({ senderId, receiverId }) => {
+      try {
+        await Message.updateMany(
+          { senderId, reciverId: receiverId, seen: false },
+          { $set: { seen: true } }
+        );
+    
+        // Optional: Notify sender that messages are seen
+        io.to(senderId).emit("messages-seen-confirmation", {
+          by: receiverId,
+        });
+      } catch (err) {
+        console.log("Error marking messages as seen:", err.message);
+      }
+    });
+    
 
     // 🔌 Disconnect
     socket.on("disconnect", () => {

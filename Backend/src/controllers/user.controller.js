@@ -201,77 +201,137 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 })
 
-// const getAllUser = asyncHandler(async (req, res) => {
-//   const currentUser = new mongoose.Types.ObjectId(req.user?._id)
-//   try {
-//     const allUsers = await User.find({_id: {$ne: currentUser}}).select("-password -refreshToken")
-//     res.status(200).json(
-//       new ApiResponse(200, allUsers, "Users fatch successfully")
-//     )
-//   } catch (error) {
-//     console.log(error.message)
-//     throw new ApiError(500, "", error.message)
-//   }
-// })
-
 const getAllUser = asyncHandler(async (req, res) => {
   const currentUserId = new mongoose.Types.ObjectId(req.user?._id);
 
-  try {
-    const usersWithUnseenCounts = await User.aggregate([
-      {
-        $match: { _id: { $ne: currentUserId } },
-      },
-      {
-        $lookup: {
-          from: "messages", // or "messages" depending on your real collection
-          let: { senderId: "$_id" }, // this is each user you’re viewing
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$senderId", "$$senderId"] },          // 👈 FROM that user
-                    { $eq: ["$reciverId", currentUserId] },        // 👈 TO current user
-                    { $eq: ["$seen", false] },                     // 👈 Only unseen
-                  ],
-                },
+  // Step 1: Get current user and cast friend IDs to ObjectId
+  const loggedInUser = await User.findById(currentUserId).lean();
+
+  const friendIds = (loggedInUser?.friends || []).map((id) =>
+    new mongoose.Types.ObjectId(id)
+  );
+
+  // 👇 Exclude current user and their friends
+  const excludeIds = [...friendIds, currentUserId];
+
+  // Step 2: Fetch all users except self and friends
+  const usersWithUnseenCounts = await User.aggregate([
+    {
+      $match: { _id: { $nin: excludeIds } },
+    },
+    {
+      $lookup: {
+        from: "messages",
+        let: { senderId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$senderId", "$$senderId"] },
+                  { $eq: ["$reciverId", currentUserId] },
+                  { $eq: ["$seen", false] },
+                ],
               },
             },
-            {
-              $count: "unseenCount",
-            },
-          ],
-          as: "unseenMessages",
-        },
-      },
-      {
-        $addFields: {
-          unseenCount: {
-            $cond: [
-              { $gt: [{ $size: "$unseenMessages" }, 0] },
-              { $arrayElemAt: ["$unseenMessages.unseenCount", 0] },
-              0,
-            ],
           },
+          {
+            $count: "unseenCount",
+          },
+        ],
+        as: "unseenMessages",
+      },
+    },
+    {
+      $addFields: {
+        unseenCount: {
+          $cond: [
+            { $gt: [{ $size: "$unseenMessages" }, 0] },
+            { $arrayElemAt: ["$unseenMessages.unseenCount", 0] },
+            0,
+          ],
         },
       },
-      {
-        $project: {
-          password: 0,
-          refreshToken: 0,
-          unseenMessages: 0,
-        },
+    },
+    {
+      $project: {
+        password: 0,
+        refreshToken: 0,
+        email: 0,
+        dob: 0,
+        friends: 0,
+        updatedAt: 0,
+        friendsRequest: 0,
+        unseenMessages: 0
       },
-    ]);
+    },
+  ]);
 
-    res
-      .status(200)
-      .json(new ApiResponse(200, usersWithUnseenCounts, "Users fetched successfully"));
-  } catch (error) {
-    console.log("Get all users error:", error.message);
-    throw new ApiError(500, "Failed to fetch users", error.message);
-  }
+  // Step 3: Fetch friends with unseen message counts
+  const friendsWithUnseenCounts = await User.aggregate([
+    {
+      $match: { _id: { $in: friendIds } },
+    },
+    {
+      $lookup: {
+        from: "messages",
+        let: { senderId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$senderId", "$$senderId"] },
+                  { $eq: ["$reciverId", currentUserId] },
+                  { $eq: ["$seen", false] },
+                ],
+              },
+            },
+          },
+          {
+            $count: "unseenCount",
+          },
+        ],
+        as: "unseenMessages",
+      },
+    },
+    {
+      $addFields: {
+        unseenCount: {
+          $cond: [
+            { $gt: [{ $size: "$unseenMessages" }, 0] },
+            { $arrayElemAt: ["$unseenMessages.unseenCount", 0] },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        password: 0,
+        refreshToken: 0,
+        email: 0,
+        dob: 0,
+        friends: 0,
+        updatedAt: 0,
+        friendsRequest: 0,
+        unseenMessages: 0
+      },
+    },
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        data: {
+          usersWithUnseenCounts,
+          friendsWithUnseenCounts,
+        },
+      },
+      "Users fetched successfully"
+    )
+  );
 });
 
 

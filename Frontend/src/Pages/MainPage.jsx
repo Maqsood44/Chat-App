@@ -3,8 +3,10 @@ import Sidebar from "../Components/Sidebar";
 import MessageArea from "../Components/MessageArea";
 import axios from "axios";
 import NoChat from "../Components/NoChat";
+import { useSelector } from "react-redux";
 
 const ChatApp = () => {
+  const user = useSelector((state) => {state.login?.user})
   const [allUsers, setAllUsers] = useState([]);
   const [selectUser, setSelectUser] = useState(null);
   const [conversation, setConversation] = useState([]);
@@ -13,6 +15,7 @@ const ChatApp = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+
         const res = await axios.get("/api/v1/user/getalluser");
         setAllUsers(res.data?.data || []);
       } catch (error) {
@@ -28,6 +31,13 @@ const ChatApp = () => {
       if (!selectUser?._id) return;
 
       try {
+
+        if (selectUser?._id && user?._id) {
+          socket.emit("seen-messages", {
+            senderId: selectUser._id,     // the one who sent messages
+            receiverId: user._id          // current logged-in user
+          });
+        }
         const res = await axios.get(
           `/api/v1/chat/fetchmessages/${selectUser._id}`
         );
