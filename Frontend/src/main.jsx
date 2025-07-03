@@ -11,11 +11,12 @@ import Layout from "./Layout.jsx";
 import { store } from "./Store/ReduxStore.js";
 import { Provider } from "react-redux";
 import LoginRedirect from "./Components/LoginRedirect.jsx";
+import MainPage from "./Pages/MainPage.jsx"
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-    <Route path="" element={<LoginRedirect />} />
+      <Route path="" element={<LoginRedirect />} />
     </Route>
   )
 );

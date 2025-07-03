@@ -31,7 +31,7 @@ export default function ChatComponent({
     const messageHandler = ({ from, message }) => {
       setConversation((prev) => [
         ...prev,
-        { senderId: from, message, timestamp: new Date() },
+        { senderId: from, message },
       ]);
     };
 
@@ -40,7 +40,7 @@ export default function ChatComponent({
     return () => {
       socket.off("private-message", messageHandler);
     };
-  }, [user?._id, setConversation]);
+  }, [user?._id, conversation]);
 
   // ✅ Handle Send Message
   const handleSendMessage = async (e) => {
@@ -55,7 +55,7 @@ export default function ChatComponent({
 
       setConversation((prev) => [
         ...prev,
-        { senderId: user._id, message, createdAt: new Date() },
+        { senderId: user._id, message },
       ]);
       setMessage("");
     } catch (error) {
@@ -97,7 +97,7 @@ export default function ChatComponent({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 flex flex-col space-y space-y-4">
-        {[...conversation].map((msg, index) => {
+        {conversation.map((msg, index) => {
           const isSentByUser = msg.senderId === user._id;
           return (
             <div

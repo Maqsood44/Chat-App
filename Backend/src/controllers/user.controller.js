@@ -215,7 +215,7 @@ const getAllUser = asyncHandler(async (req, res) => {
   const excludeIds = [...friendIds, currentUserId];
 
   // Step 2: Fetch all users except self and friends
-  const usersWithUnseenCounts = await User.aggregate([
+  const users = await User.aggregate([
     {
       $match: { _id: { $nin: excludeIds } },
     },
@@ -268,7 +268,7 @@ const getAllUser = asyncHandler(async (req, res) => {
   ]);
 
   // Step 3: Fetch friends with unseen message counts
-  const friendsWithUnseenCounts = await User.aggregate([
+  const friends = await User.aggregate([
     {
       $match: { _id: { $in: friendIds } },
     },
@@ -325,8 +325,8 @@ const getAllUser = asyncHandler(async (req, res) => {
       200,
       {
         data: {
-          usersWithUnseenCounts,
-          friendsWithUnseenCounts,
+          users,
+          friends,
         },
       },
       "Users fetched successfully"
