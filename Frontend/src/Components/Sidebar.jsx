@@ -10,11 +10,10 @@ import { FaUserPlus } from "react-icons/fa";
 export default function Sidebar({ allUsers, setSelectUser, selectUser }) {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
-  console.log(allUsers.data)
 
   const handleLogout = async () => {
     try {
-      const res = await axios.get("/api/v1/user/logout");
+     await axios.get("/api/v1/user/logout");
 
       dispatch(logoutUser());
     } catch (error) {

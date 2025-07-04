@@ -23,7 +23,7 @@ const ChatApp = () => {
       }
     };
     fetchUsers();
-  }, [conversation]);
+  }, [allUsers]);
 
   // 🟨 When user selected, fetch conversation
   useEffect(() => {
@@ -65,6 +65,7 @@ const ChatApp = () => {
         selectUser={selectUser}
         conversation={conversation}
         setConversation={setConversation}
+        setAllUsers={setAllUsers}
       />
         }
     </div>

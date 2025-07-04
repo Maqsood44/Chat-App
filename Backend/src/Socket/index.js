@@ -50,7 +50,7 @@ export const initialSocketEvent = (io) => {
         socket.emit("error", `User ${toUserId} is not online.`);
       }
     });
-
+    
     socket.on("seen-messages", async ({ senderId, receiverId }) => {
       try {
         await Message.updateMany(
@@ -58,14 +58,17 @@ export const initialSocketEvent = (io) => {
           { $set: { seen: true } }
         );
     
-        // Optional: Notify sender that messages are seen
-        io.to(senderId).emit("messages-seen-confirmation", {
-          by: receiverId,
-        });
+        const receiverSocketId = users[senderId];
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("messages-seen-confirmation", {
+            by: receiverId,
+          });
+        }
       } catch (err) {
         console.log("Error marking messages as seen:", err.message);
       }
     });
+    
     
 
     // 🔌 Disconnect

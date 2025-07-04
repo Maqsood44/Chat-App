@@ -38,7 +38,7 @@ const sendMessage = asyncHandler(async (req, res) => {
       console.log(`📡 Emitting to receiver socket ID: ${receiverSocketId}`);
   
       io.to(receiverSocketId).emit("private-message", {
-        from: req.usr?._id,
+        from: req.user?._id,
         message,
       });
     } else {
